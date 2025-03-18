@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # Firestore Emulator
+  firestore:
+    image: google/cloud-sdk
+    container_name: firestore_emulator
+    command: ["gcloud", "beta", "emulators", "firestore", "start", "--host-port=0.0.0.0:8080"]
+    ports:
+      - "8080:8080"
+
+  # NestJS API
+  api:
+    build: .
+    container_name: bento-api
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - firestore
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIRESTORE_EMULATOR_HOST: firestore:8080
+      FIREBASE_AUTH_API_KEY: ${FIREBASE_AUTH_API_KEY}
+      BENTO_API_BASE_URL: ${BENTO_API_BASE_URL}
+      BENTO_MERCHANT_ID: ${BENTO_MERCHANT_ID}
+      BENTO_TEST_EMAIL: ${BENTO_TEST_EMAIL}
+      BENTO_TEST_PASSWORD: ${BENTO_TEST_PASSWORD}
